@@ -27,6 +27,8 @@ The server runs in one of two modes:
 
 The load client in `client/` uses tokio and hyper over HTTP/1.1.
 
+The benchmark harness, load client and server were written with [Claude Code](https://claude.com/claude-code), which also ran the measurements. The results were reviewed by hand.
+
 ## Running
 
 Linux only, because RSS is read from `/proc/<pid>/status`. You need Rust (stable) and Python 3.
