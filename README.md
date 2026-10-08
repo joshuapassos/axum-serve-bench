@@ -91,8 +91,8 @@ BUILDS="main 3915 fork both" MODES=router STATELESS=stateless ./bench.sh "held k
 | RSS per held connection, `Router<()>` without `with_state` | 329 kB | 374 kB | 27 kB | 27 kB |
 | `churn` conn/s | 643 | 6 654 | 51 760 | 51 778 |
 | `churn` p99 | 297 ms | 31 ms | 4.1 ms | 4.5 ms |
-| `keepalive` req/s, with state | 216k | 252k | 228k | 248k |
-| `keepalive` p99, with state | 809 µs | 607 µs | 665 µs | 629 µs |
+| `keepalive` req/s, with state (15 reps) | 262k | 288k | 268k | 293k |
+| `keepalive` p99, with state (15 reps) | 577 µs | 549 µs | 562 µs | 547 µs |
 
 The two PRs target different costs.
 
@@ -102,10 +102,11 @@ The two PRs target different costs.
 
 Combined, you get both benefits.
 
-`keepalive` throughput varies by about ±20% between separate runs on this machine, so compare columns within one table, not across tables.
+`keepalive` throughput is noisy on this machine: about ±10% within a session and more between sessions. Its rows are therefore from a separate 15-rep run with the builds interleaved: `BUILDS="main 3915 fork both" MODES=router ./bench.sh keepalive 15`. The interquartile ranges of #3915 and `main` (280k–294k vs 254k–267k) don't overlap. #3936 doesn't touch the request path, so its +2% over `main` is the noise floor.
 
 The raw rows are in `results/`:
 
 - `results.tsv`: #3936 vs `main`, every scenario;
 - `results-3915.tsv`: the four-build run;
+- `results-3915-keepalive15.tsv`: `keepalive` rerun with 15 reps;
 - `results-first15.tsv`: the `first` scenario rerun with 15 reps.
