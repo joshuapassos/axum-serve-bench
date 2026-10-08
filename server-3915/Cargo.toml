@@ -1,0 +1,14 @@
+[package]
+name = "bench-server"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+axum = { git = "https://github.com/joshuapassos/axum", rev = "811d91a6" }
+tokio = { version = "1", features = ["full"] }
+tokio-stream = "0.1"
+futures-util = "0.3"
+tower = { version = "0.5", features = ["limit"] }
+
+[profile.release]
+debug = false

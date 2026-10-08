@@ -2,7 +2,7 @@
 # Main-vs-fork bench of `axum::serve(listener, router)` and
 # `serve(listener, router.into_make_service())`.
 #
-#   bench.sh <scenario|all> [reps]      scenarios: held sse churn keepalive connect burst first
+#   [BUILDS="main fork 3915 both"] [MODES="router make-service"] [STATELESS=stateless] bench.sh <scenario|all> [reps]      scenarios: held sse churn keepalive connect burst first
 #
 # Appends rows `scenario build mode rep metric value` to out/results.tsv;
 # summarize.py turns them into the median table.
@@ -18,7 +18,7 @@ rss() { awk '/VmRSS/{print $2}' "/proc/$1/status" 2>/dev/null || echo 0; }
 
 start_server() { # build mode [stateless]
   : > "$H/out/server.log"
-  "$H/target-server-$1/release/bench-server" "$2" "$PORT" "${3:-}" > "$H/out/server.log" 2>&1 &
+  "$H/target-server-$1/release/bench-server" "$2" "$PORT" "${3:-${STATELESS:-}}" > "$H/out/server.log" 2>&1 &
   SPID=$!
   guard $SPID &
   for _ in $(seq 200); do grep -q ready "$H/out/server.log" && return 0; sleep 0.05; done
@@ -36,7 +36,7 @@ guard() {
     sleep 0.5
   done
 }
-rec() { printf "%s\t%s\t%s\t%s\t%s\t%s\n" "$SC" "$BUILD" "$MODE" "$REP" "$1" "$2" >> "$RES"; }
+rec() { printf "%s\t%s\t%s\t%s\t%s\t%s\n" "$SC${STATELESS:+-stateless}" "$BUILD" "$MODE" "$REP" "$1" "$2" >> "$RES"; }
 kv() { grep "^$2=" "$1" | head -1 | cut -d= -f2; }
 rec_all() { while IFS='=' read -r k v; do [ -n "$k" ] && rec "$k" "$v"; done < "$1"; }
 
@@ -108,8 +108,8 @@ sc_first() { # fresh server per sample; stateful (with_state) and stateless rout
 
 run_matrix() {
   for REP in $(seq "$REPS"); do
-    for BUILD in main fork; do
-      for MODE in router make-service; do
+    for BUILD in ${BUILDS:-main fork 3915 both}; do
+      for MODE in ${MODES:-router make-service}; do
         echo "[$(date +%T)] $SC $BUILD $MODE rep$REP" >&2
         "sc_$SC"
       done

@@ -3,7 +3,7 @@
 set -eu
 cd "$(dirname "$0")"
 export CARGO_BUILD_JOBS=${CARGO_BUILD_JOBS:-4}
-for v in main fork; do
+for v in main fork 3915 both; do
   (cd server-$v && CARGO_TARGET_DIR=../target-server-$v cargo build --release -q)
 done
 (cd client && CARGO_TARGET_DIR=../target-client cargo build --release -q)
